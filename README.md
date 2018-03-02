@@ -1,3 +1,6 @@
+# Group members
+Jason Lan, Conner Lambden, Jeremiah Hsu
+
 # Attack the Auction
 Welcome to lab03. In this assignment you'll be getting acclimated with external calls, inheritance, and smart contract security.
 
