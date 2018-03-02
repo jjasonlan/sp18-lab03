@@ -14,7 +14,17 @@ contract GoodAuction is AuctionInterface {
 		reassignment. Must return false on failure and 
 		allow people to retrieve their funds  */
 	function bid() payable external returns(bool) {
-		// YOUR CODE HERE
+		if (msg.value > highestBid) {
+			if (highestBid != 0) {
+				refunds[highestBidder] += highestBid;
+			}
+			highestBidder = msg.sender;
+			highestBid = msg.value;
+			return true;
+		} else {
+			refunds[msg.sender] = msg.value;
+			return false;
+		}
 	}
 
 	/*  Implement withdraw function to complete new 
@@ -22,7 +32,18 @@ contract GoodAuction is AuctionInterface {
 	    return of owed funds and false on failure
 	    or no funds owed.  */
 	function withdrawRefund() external returns(bool) {
-		// YOUR CODE HERE
+		var refundAmount = refunds[msg.sender];
+		if (refundAmount == 0) {
+			return false;
+		}
+
+		refunds[msg.sender] -= refundAmount;
+		if (msg.sender.send(refundAmount)) {
+			return true;
+		} else {
+			refunds[msg.sender] += refundAmount;
+			return false;
+		}
 	}
 
 	/*  Allow users to check the amount they are owed
@@ -37,14 +58,20 @@ contract GoodAuction is AuctionInterface {
 		and applying it to the reduceBid function 
 		you fill in below. */
 	modifier canReduce() {
-		_;
+        require(msg.sender == highestBidder);
+        _;
 	}
 
 
 	/*  Rewrite reduceBid from BadAuction to fix
 		the security vulnerabilities. Should allow the
 		current highest bidder only to reduce their bid amount */
-	function reduceBid() external {}
+	function reduceBid() external {
+		if (highestBid > 0 && msg.sender == highestBidder) {
+			highestBid -= 1;
+			highestBidder.transfer(1);
+		}
+	}
 
 
 	/* 	Remember this fallback function
@@ -55,7 +82,7 @@ contract GoodAuction is AuctionInterface {
 		How do we send people their money back?  */
 
 	function () payable {
-		// YOUR CODE HERE
+		revert();
 	}
 
 }
